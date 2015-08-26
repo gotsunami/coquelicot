@@ -1,2 +1,4 @@
-# coquelicot
-Upload your files as easily as a poppy petal flies into the air
+## Coquelicot
+
+Coquelicot is an easy to use server-side upload service written in Go (support for jQuery-File-Upload
+only at the moment).
