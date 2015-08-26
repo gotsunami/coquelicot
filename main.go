@@ -57,7 +57,7 @@ func CreateAttachment(c *gin.Context) {
 	files, err := upload.Process(c.Request, *storage)
 	if err == upload.Incomplete {
 		c.JSON(http.StatusOK, gin.H{
-			"status": "ok",
+			"status": http.StatusText(http.StatusOK),
 			"file":   gin.H{"size": files[0].Size},
 		})
 		return
@@ -71,6 +71,9 @@ func CreateAttachment(c *gin.Context) {
 	}
 
 	data := make([]map[string]interface{}, 0)
+	// Expected status if no error
+	status := http.StatusCreated
+
 	for _, ofile := range files {
 		attachment, err := attachment.Create(*storage, ofile, converts)
 		if err != nil {
@@ -79,13 +82,13 @@ func CreateAttachment(c *gin.Context) {
 				"size":  ofile.Size,
 				"error": err.Error(),
 			})
+			status = http.StatusInternalServerError
 			continue
 		}
 		data = append(data, attachment.ToJson())
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"status": "ok", "files": data})
-
+	c.JSON(status, gin.H{"status": http.StatusText(status), "files": data})
 }
 
 // Get parameters for convert from Request query string
