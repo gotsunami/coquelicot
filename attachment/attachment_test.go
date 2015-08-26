@@ -3,7 +3,7 @@ package attachment
 import (
 	"testing"
 
-	"github.com/kavkaz/pavo/upload"
+	"github.com/gostunami/coquelicot/upload"
 	"github.com/stretchr/testify/assert"
 )
 

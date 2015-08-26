@@ -8,12 +8,11 @@ import (
 	"net/http"
 	"time"
 
-	"code.google.com/p/go-uuid/uuid"
-
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
-	"github.com/kavkaz/pavo/attachment"
-	"github.com/kavkaz/pavo/upload"
+	"github.com/gotsunami/coquelicot/attachment"
+	"github.com/gotsunami/coquelicot/upload"
+	"github.com/pborman/uuid"
 )
 
 func main() {
