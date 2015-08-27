@@ -21,10 +21,10 @@ func TestUploadMultipart(t *testing.T) {
 	var body bytes.Buffer
 	mw := multipart.NewWriter(&body)
 
-	if err := writeMPBody("../dummy/32509211_news_bigpic.jpg", mw); err != nil {
+	if err := writeMPBody("../bin/coquelicot/dummy/32509211_news_bigpic.jpg", mw); err != nil {
 		assert.Error(err)
 	}
-	if err := writeMPBody("../dummy/kino.jpg", mw); err != nil {
+	if err := writeMPBody("../bin/coquelicot/dummy/kino.jpg", mw); err != nil {
 		assert.Error(err)
 	}
 
@@ -34,7 +34,7 @@ func TestUploadMultipart(t *testing.T) {
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	req.AddCookie(&http.Cookie{Name: "pavo", Value: "abcdef"})
 
-	files, err := Process(req, "../dummy/root_storage")
+	files, err := Process(req, "../bin/coquelicot/dummy/root_storage")
 	assert.Nil(err)
 	assert.Equal("kino.jpg", files[1].Filename)
 	assert.Equal("image", files[1].BaseMime)
@@ -45,11 +45,11 @@ func TestUploadBinary(t *testing.T) {
 
 	req, _ := http.NewRequest("POST", "/files", nil)
 	req.Header.Set("Content-Type", "application/octet-stream")
-	req.Header.Set("X-File", "../dummy/bin-data")
+	req.Header.Set("X-File", "../bin/coquelicot/dummy/bin-data")
 	req.Header.Set("Content-Disposition", `attachment; filename="basta.png"`)
 	req.AddCookie(&http.Cookie{Name: "pavo", Value: "abcdef"})
 
-	files, err := Process(req, "../dummy/root_storage")
+	files, err := Process(req, "../bin/coquelicot/dummy/root_storage")
 	assert.Nil(err)
 	assert.Equal("basta.png", files[0].Filename)
 	assert.Equal("image", files[0].BaseMime)
