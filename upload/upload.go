@@ -4,13 +4,11 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -124,7 +122,7 @@ func (up *Uploader) SaveFile() (*OriginalFile, error) {
 		return ofile, Incomplete
 	}
 
-	ofile.BaseMime, err = IdentifyMime(ofile.Filepath)
+	ofile.BaseMime, err = identifyMime(ofile.Filepath)
 	if err != nil {
 		return nil, err
 	}
@@ -214,16 +212,20 @@ func (up *Uploader) Write(temp_file *os.File, body io.Reader) error {
 	return err
 }
 
-// Get base mime type
-//		$ file --mime-type pic.jpg
-//		pic.jpg: image/jpeg
-func IdentifyMime(file string) (string, error) {
-	out, err := exec.Command("file", "--mime-type", file).CombinedOutput()
+// identifyMine gets base mime type.
+func identifyMime(file string) (string, error) {
+	f, err := os.Open(file)
 	if err != nil {
-		return "", fmt.Errorf("identify: err: %s; detail: %s", err, string(out))
+		return "", err
 	}
-
-	mime := strings.Split(strings.Split(string(out), ": ")[1], "/")[0]
+	defer f.Close()
+	// DetectContentType reads at most the first 512 bytes
+	buf := make([]byte, 512)
+	_, err = f.Read(buf)
+	if err != nil {
+		return "", err
+	}
+	mime := strings.Split(http.DetectContentType(buf), "/")[0]
 
 	return mime, nil
 }
