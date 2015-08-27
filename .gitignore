@@ -1,5 +1,4 @@
 *.swp
 tags
 bin/coquelicot/coquelicot
-dummy/root_storage/application
-dummy/root_storage/image/
+bin/coquelicot/dummy/root_storage/*
