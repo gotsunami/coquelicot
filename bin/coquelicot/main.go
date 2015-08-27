@@ -17,6 +17,10 @@ import (
 
 func main() {
 	flag.Parse()
+	if *version {
+		fmt.Printf("version: %s\n", appVersion)
+		return
+	}
 
 	r := gin.Default()
 	r.Use(CORSMiddleware())
