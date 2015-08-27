@@ -73,7 +73,10 @@ func (fbm *FileBaseManager) copyFile(src, dst string) error {
 			return err
 		}
 	}
-	return fbm.copyFileContents(src, dst)
+	if err := fbm.copyFileContents(src, dst); err != nil {
+		return err
+	}
+	return os.Remove(src)
 }
 
 // copyFileContents copies the contents of the file named src to the file named
