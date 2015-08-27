@@ -22,9 +22,9 @@ func TestParseMeta(t *testing.T) {
 	assert.Equal(meta.MediaType, "multipart/form-data")
 	assert.Equal(meta.Boundary, "----Zam1WUeLK7vBj4wN")
 
-	assert.Equal(meta.Range.Start, 512000)
-	assert.Equal(meta.Range.End, 1023999)
-	assert.Equal(meta.Range.Size, 1141216)
+	assert.Equal(meta.Range.Start, int64(512000))
+	assert.Equal(meta.Range.End, int64(1023999))
+	assert.Equal(meta.Range.Size, int64(1141216))
 
 	assert.Equal(meta.Filename, "picture.jpg")
 
