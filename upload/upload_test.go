@@ -15,16 +15,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const dummy = "../bin/coquelicot/dummy"
+
 func TestUploadMultipart(t *testing.T) {
 	assert := assert.New(t)
 
 	var body bytes.Buffer
 	mw := multipart.NewWriter(&body)
 
-	if err := writeMPBody("../bin/coquelicot/dummy/32509211_news_bigpic.jpg", mw); err != nil {
+	if err := writeMPBody(dummy+"/32509211_news_bigpic.jpg", mw); err != nil {
 		assert.Error(err)
 	}
-	if err := writeMPBody("../bin/coquelicot/dummy/kino.jpg", mw); err != nil {
+	if err := writeMPBody(dummy+"/kino.jpg", mw); err != nil {
 		assert.Error(err)
 	}
 
@@ -34,7 +36,7 @@ func TestUploadMultipart(t *testing.T) {
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	req.AddCookie(&http.Cookie{Name: "pavo", Value: "abcdef"})
 
-	files, err := Process(req, "../bin/coquelicot/dummy/root_storage")
+	files, err := Process(req, dummy+"/root_storage")
 	assert.Nil(err)
 	assert.Equal("kino.jpg", files[1].Filename)
 	assert.Equal("image", files[1].BaseMime)
@@ -45,11 +47,11 @@ func TestUploadBinary(t *testing.T) {
 
 	req, _ := http.NewRequest("POST", "/files", nil)
 	req.Header.Set("Content-Type", "application/octet-stream")
-	req.Header.Set("X-File", "../bin/coquelicot/dummy/bin-data")
+	req.Header.Set("X-File", dummy+"/bin-data")
 	req.Header.Set("Content-Disposition", `attachment; filename="basta.png"`)
 	req.AddCookie(&http.Cookie{Name: "pavo", Value: "abcdef"})
 
-	files, err := Process(req, "../bin/coquelicot/dummy/root_storage")
+	files, err := Process(req, dummy+"/root_storage")
 	assert.Nil(err)
 	assert.Equal("basta.png", files[0].Filename)
 	assert.Equal("image", files[0].BaseMime)
@@ -58,8 +60,8 @@ func TestUploadBinary(t *testing.T) {
 
 func TestUploadChunked(t *testing.T) {
 	assert := assert.New(t)
-	storage := "../dummy/root_storage"
-	fname := "../dummy/kino.jpg"
+	storage := dummy + "/root_storage"
+	fname := dummy + "/kino.jpg"
 	f, _ := os.Open(fname)
 	defer f.Close()
 
@@ -69,19 +71,19 @@ func TestUploadChunked(t *testing.T) {
 	req.AddCookie(cookie)
 	files, err := Process(req, storage)
 	assert.Equal(Incomplete, err)
-	assert.Equal(25000, files[0].Size)
+	assert.Equal(25000, int(files[0].Size))
 
 	req = createChunkRequest(f, 25000, 49999)
 	req.AddCookie(cookie)
 	files, err = Process(req, storage)
 	assert.Equal(Incomplete, err)
-	assert.Equal(50000, files[0].Size)
+	assert.Equal(50000, int(files[0].Size))
 
 	req = createChunkRequest(f, 50000, 52096)
 	req.AddCookie(cookie)
 	files, err = Process(req, storage)
 	assert.Nil(err)
-	assert.Equal(52097, files[0].Size)
+	assert.Equal(52097, int(files[0].Size))
 	assert.Equal("kino.jpg", files[0].Filename)
 }
 
@@ -105,7 +107,7 @@ func createChunkRequest(f *os.File, start int64, end int64) *http.Request {
 func TestTempFileChunks(t *testing.T) {
 	assert := assert.New(t)
 
-	file, err := TempFileChunks(0, "../dummy/root_storage", "abcdef", "kino.jpg")
+	file, err := TempFileChunks(0, dummy+"/root_storage", "abcdef", "kino.jpg")
 	assert.Nil(err)
 	assert.NotNil(file)
 }
