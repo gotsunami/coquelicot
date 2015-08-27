@@ -3,15 +3,17 @@ package attachment
 import (
 	"testing"
 
-	"github.com/gostunami/coquelicot/upload"
+	"github.com/gotsunami/coquelicot/upload"
 	"github.com/stretchr/testify/assert"
 )
+
+const dummy = "../bin/coquelicot/dummy"
 
 func TestCreateAttachment(t *testing.T) {
 	assert := assert.New(t)
 
 	ofile := originalImageFile()
-	storage := "../dummy/root_storage"
+	storage := dummy + "/root_storage"
 	converts := map[string]string{"original": "", "thumbnail": "120x80"}
 
 	attachment, err := Create(storage, ofile, converts)
@@ -25,7 +27,7 @@ func TestCreateAttachment(t *testing.T) {
 func originalImageFile() *upload.OriginalFile {
 	return &upload.OriginalFile{
 		BaseMime: "image",
-		Filepath: "../dummy/32509211_news_bigpic.jpg",
+		Filepath: dummy + "/32509211_news_bigpic.jpg",
 		Filename: "32509211_news_bigpic.jpg",
 	}
 }
@@ -33,7 +35,7 @@ func originalImageFile() *upload.OriginalFile {
 func originalPdfFile() *upload.OriginalFile {
 	return &upload.OriginalFile{
 		BaseMime: "application",
-		Filepath: "../dummy/Learning-Go-latest.pdf",
+		Filepath: dummy + "/Learning-Go-latest.pdf",
 		Filename: "Learning-Go-latest.pdf",
 	}
 }
