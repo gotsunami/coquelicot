@@ -1,19 +1,15 @@
-package attachment
-
-import (
-	"github.com/gotsunami/coquelicot/upload"
-)
+package coquelicot
 
 // Attachment contain info about directory, base mime type and all files saved.
 type Attachment struct {
-	OriginalFile *upload.OriginalFile
+	OriginalFile *OriginalFile
 	Dir          *DirManager
 	Versions     map[string]FileManager
 }
 
 // Function receive root directory, original file, convertaion parametrs.
 // Return Attachment saved.
-func Create(storage string, ofile *upload.OriginalFile, converts map[string]string) (*Attachment, error) {
+func Create(storage string, ofile *OriginalFile, converts map[string]string) (*Attachment, error) {
 	dm, err := CreateDir(storage, ofile.BaseMime)
 	if err != nil {
 		return nil, err

@@ -1,4 +1,4 @@
-package attachment
+package coquelicot
 
 import (
 	"os"

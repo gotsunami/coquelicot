@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gotsunami/coquelicot/attachment"
-	"github.com/gotsunami/coquelicot/upload"
 	"github.com/pborman/uuid"
 )
 
@@ -37,8 +35,8 @@ func (s *Storage) UploadHandler(c *gin.Context) {
 		http.SetCookie(c.Writer, pavo)
 	}
 
-	files, err := upload.Process(c.Request, s.StorageDir())
-	if err == upload.Incomplete {
+	files, err := Process(c.Request, s.StorageDir())
+	if err == Incomplete {
 		c.JSON(http.StatusOK, gin.H{
 			"status": http.StatusText(http.StatusOK),
 			"file":   gin.H{"size": files[0].Size},
@@ -58,7 +56,7 @@ func (s *Storage) UploadHandler(c *gin.Context) {
 	status := http.StatusCreated
 
 	for _, ofile := range files {
-		attachment, err := attachment.Create(s.StorageDir(), ofile, converts)
+		attachment, err := Create(s.StorageDir(), ofile, converts)
 		if err != nil {
 			data = append(data, map[string]interface{}{
 				"name":  ofile.Filename,

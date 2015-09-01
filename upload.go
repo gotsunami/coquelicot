@@ -1,4 +1,4 @@
-package upload
+package coquelicot
 
 import (
 	"crypto/md5"
