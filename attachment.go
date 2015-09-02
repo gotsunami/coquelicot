@@ -7,7 +7,7 @@ type Attachment struct {
 	Versions     map[string]FileManager
 }
 
-// Function receive root directory, original file, convertaion parametrs.
+// Function receive root directory, original file, convertion parameters.
 // Return Attachment saved.
 func Create(storage string, ofile *OriginalFile, converts map[string]string) (*Attachment, error) {
 	dm, err := CreateDir(storage, ofile.BaseMime)

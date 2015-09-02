@@ -10,6 +10,12 @@ import (
 	"github.com/pborman/uuid"
 )
 
+func (s *Storage) FilesHandler(c *gin.Context) {
+	status := http.StatusOK
+	// FIXME: nil content
+	c.JSON(status, gin.H{"status": http.StatusText(status), "files": nil})
+}
+
 // UploadHandler is the endpoint for uploading and storing files.
 func (s *Storage) UploadHandler(c *gin.Context) {
 	converts, err := GetConvertParams(c.Request)
@@ -24,7 +30,6 @@ func (s *Storage) UploadHandler(c *gin.Context) {
 
 	pavo, _ := c.Request.Cookie("pavo")
 	if pavo == nil {
-
 		pavo = &http.Cookie{
 			Name:    "pavo",
 			Value:   uuid.New(),
@@ -35,7 +40,9 @@ func (s *Storage) UploadHandler(c *gin.Context) {
 		http.SetCookie(c.Writer, pavo)
 	}
 
+	// Performs the processing of writing data into chunk files.
 	files, err := Process(c.Request, s.StorageDir())
+
 	if err == Incomplete {
 		c.JSON(http.StatusOK, gin.H{
 			"status": http.StatusText(http.StatusOK),

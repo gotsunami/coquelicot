@@ -131,7 +131,7 @@ func (up *Uploader) SaveFile() (*OriginalFile, error) {
 }
 
 // Returns the reader to read the file or chunk of request body and the original file name.
-// If the request header Conent-Type is multipart/form-data, returns the next copy part.
+// If the request header Content-Type is multipart/form-data, returns the next copy part.
 // If all of part read the case of binary loading read the request body, an error is returned io.EOF.
 func (up *Uploader) Reader() (io.Reader, string, error) {
 	if up.Meta.MediaType == "multipart/form-data" {
@@ -149,7 +149,7 @@ func (up *Uploader) Reader() (io.Reader, string, error) {
 		}
 	}
 
-	if up.Body.Available == false {
+	if !up.Body.Available {
 		return nil, "", io.EOF
 	}
 

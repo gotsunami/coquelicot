@@ -24,6 +24,7 @@ func main() {
 	r.Use(static.ServeRoot("/", s.StorageDir()))
 
 	r.POST("/files", s.UploadHandler)
+	r.GET("/files", s.FilesHandler)
 
 	log.Printf("Storage place in: %s", s.StorageDir())
 	log.Printf("Start server on %s", *host)
