@@ -99,18 +99,19 @@ func GetConvertParams(req *http.Request) (map[string]string, error) {
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		//c.Writer.Header().Set("Content-Type", "application/json")
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set(
-			"Access-Control-Allow-Methods",
-			"POST, GET, OPTIONS, PUT, PATCH, DELETE")
-		c.Writer.Header().Set(
-			"Access-Control-Allow-Headers",
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, PATCH, DELETE")
+		c.Writer.Header().Set("Access-Control-Allow-Headers",
 			"Content-Type, Content-Length, Accept-Encoding, Content-Range, Content-Disposition, Authorization")
+		// Since we need to support cross-domain cookies, we must support XHR requests
+		// with credentials, so the Access-Control-Allow-Credentials header is required
+		// and Access-Control-Allow-Origin cannot be equal to "*" but reply with the same Origin.
+		// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS.
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Add("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
+
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(200)
 			return
 		}
-		// c.Next()
 	}
 }
