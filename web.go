@@ -1,9 +1,13 @@
 package coquelicot
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
+	"path"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +18,35 @@ func (s *Storage) FilesHandler(c *gin.Context) {
 	status := http.StatusOK
 	// FIXME: nil content
 	c.JSON(status, gin.H{"status": http.StatusText(status), "files": nil})
+}
+
+// ResumeHandler allows resuming a file upload.
+func (s *Storage) ResumeHandler(c *gin.Context) {
+	status := http.StatusOK
+	filename := c.Request.URL.Query().Get("file")
+
+	cookie, _ := c.Request.Cookie("coquelicot")
+	offset := int64(0)
+
+	if cookie != nil {
+		hasher := md5.New()
+		hasher.Write([]byte(cookie.Value + filename))
+		chunkname := hex.EncodeToString(hasher.Sum(nil))
+		fi, err := os.Stat(path.Join(s.output, "chunks", chunkname))
+		if err != nil {
+			if !os.IsNotExist(err) {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"status": http.StatusText(http.StatusInternalServerError),
+					"error":  fmt.Sprintf("Resume error: %q", err.Error()),
+				})
+				return
+			}
+		} else {
+			offset = fi.Size()
+		}
+	}
+
+	c.JSON(status, gin.H{"status": http.StatusText(status), "file": gin.H{"size": offset}})
 }
 
 // UploadHandler is the endpoint for uploading and storing files.

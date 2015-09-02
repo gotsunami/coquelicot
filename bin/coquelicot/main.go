@@ -26,6 +26,7 @@ func main() {
 
 	r.POST("/files", s.UploadHandler)
 	r.GET("/files", s.FilesHandler)
+	r.GET("/resume", s.ResumeHandler)
 
 	log.Printf("Storage place in: %s", s.StorageDir())
 	log.Printf("Start server on %s", *host)
