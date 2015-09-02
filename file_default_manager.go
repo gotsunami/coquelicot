@@ -10,6 +10,18 @@ type FileDefaultManager struct {
 }
 
 func (fdm *FileDefaultManager) Convert(src string, convert string) error {
+	return fdm.rawCopy(src, convert)
+}
+
+func (fdm *FileDefaultManager) ToJson() map[string]interface{} {
+	return map[string]interface{}{
+		"url":      fdm.Url(),
+		"filename": fdm.Filename,
+		"size":     fdm.Size,
+	}
+}
+
+func (fdm *FileDefaultManager) rawCopy(src, convert string) error {
 	if err := fdm.copyFile(src, fdm.Filepath()); err != nil {
 		return err
 	}
@@ -25,13 +37,4 @@ func (fdm *FileDefaultManager) Convert(src string, convert string) error {
 	fdm.Size = fi.Size()
 
 	return nil
-}
-
-func (fdm *FileDefaultManager) ToJson() map[string]interface{} {
-	return map[string]interface{}{
-		"url":      fdm.Url(),
-		"filename": fdm.Filename,
-		"size":     fdm.Size,
-	}
-
 }

@@ -18,6 +18,7 @@ func main() {
 	}
 
 	s := coquelicot.NewStorage(*storage)
+	s.Option(coquelicot.Convert(*convert))
 
 	r := gin.Default()
 	r.Use(coquelicot.CORSMiddleware())
@@ -29,5 +30,4 @@ func main() {
 	log.Printf("Storage place in: %s", s.StorageDir())
 	log.Printf("Start server on %s", *host)
 	r.Run(*host)
-
 }

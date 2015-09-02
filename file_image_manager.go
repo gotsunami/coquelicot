@@ -6,14 +6,18 @@ import (
 )
 
 type FileImageManager struct {
-	*FileBaseManager
-	Width  int
-	Height int
-	Size   int64
+	*FileDefaultManager
+	Width   int
+	Height  int
+	convert bool // Add resized version with ImageMagick
 }
 
 // Save version from original with convert command-line tool.
 func (fim *FileImageManager) Convert(src string, convert string) error {
+	if !fim.convert {
+		// Raw copy
+		return fim.rawCopy(src, convert)
+	}
 	err := convertImage(src, fim.Filepath(), convert)
 	if err != nil {
 		return err

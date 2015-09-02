@@ -24,11 +24,12 @@ type FileBaseManager struct {
 // Return FileManager for given base mime and version.
 func NewFileManager(dm *DirManager, mime_base, version string) FileManager {
 	fbm := &FileBaseManager{Dir: dm, Version: version}
+	fdm := &FileDefaultManager{FileBaseManager: fbm}
 	switch mime_base {
 	case "image":
-		return &FileImageManager{FileBaseManager: fbm}
+		return &FileImageManager{FileDefaultManager: fdm, convert: makeThumbnail}
 	default:
-		return &FileDefaultManager{FileBaseManager: fbm}
+		return fdm
 	}
 
 	return nil
@@ -76,7 +77,7 @@ func (fbm *FileBaseManager) copyFile(src, dst string) error {
 	if err := fbm.copyFileContents(src, dst); err != nil {
 		return err
 	}
-	return os.Remove(src)
+	return nil
 }
 
 // copyFileContents copies the contents of the file named src to the file named

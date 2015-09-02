@@ -1,5 +1,9 @@
 package coquelicot
 
+import (
+	"os"
+)
+
 // Attachment contain info about directory, base mime type and all files saved.
 type Attachment struct {
 	OriginalFile *OriginalFile
@@ -33,7 +37,7 @@ func Create(storage string, ofile *OriginalFile, converts map[string]string) (*A
 		attachment.Versions[version] = fm
 	}
 
-	return attachment, nil
+	return attachment, os.Remove(attachment.OriginalFile.Filepath)
 }
 
 // Directly save single version and return FileManager.
