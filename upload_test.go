@@ -34,7 +34,7 @@ func TestUploadMultipart(t *testing.T) {
 
 	req, _ := http.NewRequest("POST", "/files", &body)
 	req.Header.Set("Content-Type", mw.FormDataContentType())
-	req.AddCookie(&http.Cookie{Name: "pavo", Value: "abcdef"})
+	req.AddCookie(&http.Cookie{Name: "coquelicot", Value: "abcdef"})
 
 	files, err := Process(req, dummy+"/root_storage")
 	assert.Nil(err)
@@ -49,7 +49,7 @@ func TestUploadBinary(t *testing.T) {
 	req.Header.Set("Content-Type", "application/octet-stream")
 	req.Header.Set("X-File", dummy+"/bin-data")
 	req.Header.Set("Content-Disposition", `attachment; filename="basta.png"`)
-	req.AddCookie(&http.Cookie{Name: "pavo", Value: "abcdef"})
+	req.AddCookie(&http.Cookie{Name: "coquelicot", Value: "abcdef"})
 
 	files, err := Process(req, dummy+"/root_storage")
 	assert.Nil(err)
@@ -65,7 +65,7 @@ func TestUploadChunked(t *testing.T) {
 	f, _ := os.Open(fname)
 	defer f.Close()
 
-	cookie := &http.Cookie{Name: "pavo", Value: uuid.New()}
+	cookie := &http.Cookie{Name: "coquelicot", Value: uuid.New()}
 
 	req := createChunkRequest(f, 0, 24999)
 	req.AddCookie(cookie)

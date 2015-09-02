@@ -28,16 +28,17 @@ func (s *Storage) UploadHandler(c *gin.Context) {
 	}
 	converts["original"] = ""
 
-	pavo, _ := c.Request.Cookie("pavo")
-	if pavo == nil {
-		pavo = &http.Cookie{
-			Name:    "pavo",
+	// File upload cookie so we can keep track of chunks.
+	cookie, _ := c.Request.Cookie("coquelicot")
+	if cookie == nil {
+		cookie = &http.Cookie{
+			Name:    "coquelicot",
 			Value:   uuid.New(),
-			Expires: time.Now().Add(10 * 356 * 24 * time.Hour),
+			Expires: time.Now().Add(2 * 24 * time.Hour),
 			Path:    "/",
 		}
-		c.Request.AddCookie(pavo)
-		http.SetCookie(c.Writer, pavo)
+		c.Request.AddCookie(cookie)
+		http.SetCookie(c.Writer, cookie)
 	}
 
 	// Performs the processing of writing data into chunk files.

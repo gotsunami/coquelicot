@@ -168,11 +168,11 @@ func (up *Uploader) TempFile() (*os.File, error) {
 
 // Returns the newly created temporary file.
 func TempFile() (*os.File, error) {
-	return ioutil.TempFile(os.TempDir(), "pavo")
+	return ioutil.TempFile(os.TempDir(), "coquelicot")
 }
 
 // Returns a temporary file to download chunk.
-// To calculate a unique file name used cookie named pavo and the original file name.
+// To calculate a unique file name used cookie named coquelicot and the original file name.
 // File located in the directory chunks storage root directory.
 // Before returning the file pointer is shifted by the value of offset,
 // in a situation where the pieces are loaded from the second to the last.

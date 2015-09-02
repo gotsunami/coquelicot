@@ -38,12 +38,12 @@ func ParseMeta(req *http.Request) (*Meta, error) {
 		return nil, err
 	}
 
-	cookie_pavo, err := req.Cookie("pavo")
+	cookie, err := req.Cookie("coquelicot")
 	if err != nil {
 		return nil, err
 	}
-	if cookie_pavo != nil {
-		meta.UploadSid = cookie_pavo.Value
+	if cookie != nil {
+		meta.UploadSid = cookie.Value
 	}
 
 	return meta, nil

@@ -16,7 +16,7 @@ func TestUploadBinary(t *testing.T) {
 	req.Header.Set("Content-Type", "application/octet-stream")
 	req.Header.Set("X-File", "./dummy/bin-data")
 	req.Header.Set("Content-Disposition", `attachment; filename="basta.png"`)
-	req.AddCookie(&http.Cookie{Name: "pavo", Value: "abcdef"})
+	req.AddCookie(&http.Cookie{Name: "coquelicot", Value: "abcdef"})
 
 	r := gin.Default()
 

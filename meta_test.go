@@ -14,7 +14,7 @@ func TestParseMeta(t *testing.T) {
 	req.Header.Set("Content-Type", "multipart/form-data; boundary=----Zam1WUeLK7vBj4wN")
 	req.Header.Set("Content-Range", "bytes 512000-1023999/1141216")
 	req.Header.Set("Content-Disposition", `attachment; filename="picture.jpg"`)
-	req.AddCookie(&http.Cookie{Name: "pavo", Value: "abcdef"})
+	req.AddCookie(&http.Cookie{Name: "coquelicot", Value: "abcdef"})
 
 	meta, err := ParseMeta(req)
 	assert.Nil(err)
