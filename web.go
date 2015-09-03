@@ -97,7 +97,8 @@ func (s *Storage) UploadHandler(c *gin.Context) {
 	status := http.StatusCreated
 
 	for _, ofile := range files {
-		attachment, err := Create(s.StorageDir(), ofile, converts)
+		// true to delete final chunk
+		attachment, err := Create(s.StorageDir(), ofile, converts, true)
 		if err != nil {
 			data = append(data, map[string]interface{}{
 				"name":  ofile.Filename,

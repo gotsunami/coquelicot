@@ -12,8 +12,8 @@ type Attachment struct {
 }
 
 // Function receive root directory, original file, convertion parameters.
-// Return Attachment saved.
-func Create(storage string, ofile *OriginalFile, converts map[string]string) (*Attachment, error) {
+// Return Attachment saved. The final chunk is deleted if delChunk is true.
+func Create(storage string, ofile *OriginalFile, converts map[string]string, delChunk bool) (*Attachment, error) {
 	dm, err := CreateDir(storage, ofile.BaseMime)
 	if err != nil {
 		return nil, err
@@ -48,7 +48,10 @@ func Create(storage string, ofile *OriginalFile, converts map[string]string) (*A
 		}
 	}
 
-	return attachment, os.Remove(attachment.OriginalFile.Filepath)
+	if delChunk {
+		return attachment, os.Remove(attachment.OriginalFile.Filepath)
+	}
+	return attachment, nil
 }
 
 // Directly save single version and return FileManager.

@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const dummy = "../bin/coquelicot/dummy"
+const dummy = "bin/coquelicot/dummy"
 
 func TestUploadMultipart(t *testing.T) {
 	assert := assert.New(t)
