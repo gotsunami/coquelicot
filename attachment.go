@@ -28,13 +28,24 @@ func Create(storage string, ofile *OriginalFile, converts map[string]string) (*A
 	if ofile.BaseMime == "image" {
 		converts["thumbnail"] = "120x90"
 	}
-	for version, convert_opt := range converts {
-		fm, err := attachment.CreateVersion(version, convert_opt)
+
+	makeVersion := func(a *Attachment, version, convert string) error {
+		fm, err := attachment.CreateVersion(version, convert)
 		if err != nil {
+			return err
+		}
+		attachment.Versions[version] = fm
+		return nil
+	}
+
+	if err := makeVersion(attachment, "original", ""); err != nil {
+		return nil, err
+	}
+
+	if makeThumbnail {
+		if err := makeVersion(attachment, "thumbnail", converts["thumbnail"]); err != nil {
 			return nil, err
 		}
-
-		attachment.Versions[version] = fm
 	}
 
 	return attachment, os.Remove(attachment.OriginalFile.Filepath)
