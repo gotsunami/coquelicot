@@ -43,7 +43,7 @@ func Create(storage string, ofile *OriginalFile, converts map[string]string) (*A
 // Directly save single version and return FileManager.
 func (attachment *Attachment) CreateVersion(version string, convert string) (FileManager, error) {
 	fm := NewFileManager(attachment.Dir, attachment.OriginalFile.BaseMime, version)
-	fm.SetFilename(attachment.OriginalFile.Ext())
+	fm.SetFilename(attachment.OriginalFile)
 
 	if err := fm.Convert(attachment.OriginalFile.Filepath, convert); err != nil {
 		return nil, err

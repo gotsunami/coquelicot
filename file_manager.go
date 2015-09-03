@@ -5,13 +5,12 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strconv"
 	"time"
 )
 
 type FileManager interface {
 	Convert(string, string) error
-	SetFilename(string)
+	SetFilename(*OriginalFile)
 	ToJson() map[string]interface{}
 }
 
@@ -35,9 +34,12 @@ func NewFileManager(dm *DirManager, mime_base, version string) FileManager {
 	return nil
 }
 
-func (fbm *FileBaseManager) SetFilename(ext string) {
-	salt := strconv.FormatInt(seconds(), 36)
-	fbm.Filename = fbm.Version + "-" + salt + ext
+func (fbm *FileBaseManager) SetFilename(file *OriginalFile) {
+	ext := filepath.Ext(file.Filename)
+	fbm.Filename = file.Filename[:len(file.Filename)-len(ext)] + "-" + fbm.Version + file.Ext()
+	if fbm.Version == "original" {
+		fbm.Filename = file.Filename
+	}
 }
 
 func (fbm *FileBaseManager) Filepath() string {
