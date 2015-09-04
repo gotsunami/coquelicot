@@ -28,11 +28,8 @@ func NewFileManager(dm *DirManager, mime_base, version string) FileManager {
 	switch mime_base {
 	case "image":
 		return &FileImageManager{FileDefaultManager: fdm, convert: makeThumbnail}
-	default:
-		return fdm
 	}
-
-	return nil
+	return fdm
 }
 
 func (fbm *FileBaseManager) SetFilename(ext string) {
