@@ -12,8 +12,8 @@ type Attachment struct {
 }
 
 // Function receive root directory, original file, convertion parameters.
-// Return Attachment saved.
-func Create(storage string, ofile *OriginalFile, converts map[string]string) (*Attachment, error) {
+// Return Attachment saved. The final chunk is deleted if delChunk is true.
+func Create(storage string, ofile *OriginalFile, converts map[string]string, delChunk bool) (*Attachment, error) {
 	dm, err := CreateDir(storage, ofile.BaseMime)
 	if err != nil {
 		return nil, err
@@ -28,22 +28,36 @@ func Create(storage string, ofile *OriginalFile, converts map[string]string) (*A
 	if ofile.BaseMime == "image" {
 		converts["thumbnail"] = "120x90"
 	}
-	for version, convert_opt := range converts {
-		fm, err := attachment.CreateVersion(version, convert_opt)
-		if err != nil {
-			return nil, err
-		}
 
+	makeVersion := func(a *Attachment, version, convert string) error {
+		fm, err := attachment.CreateVersion(version, convert)
+		if err != nil {
+			return err
+		}
 		attachment.Versions[version] = fm
+		return nil
 	}
 
-	return attachment, os.Remove(attachment.OriginalFile.Filepath)
+	if err := makeVersion(attachment, "original", ""); err != nil {
+		return nil, err
+	}
+
+	if makeThumbnail {
+		if err := makeVersion(attachment, "thumbnail", converts["thumbnail"]); err != nil {
+			return nil, err
+		}
+	}
+
+	if delChunk {
+		return attachment, os.Remove(attachment.OriginalFile.Filepath)
+	}
+	return attachment, nil
 }
 
 // Directly save single version and return FileManager.
 func (attachment *Attachment) CreateVersion(version string, convert string) (FileManager, error) {
 	fm := NewFileManager(attachment.Dir, attachment.OriginalFile.BaseMime, version)
-	fm.SetFilename(attachment.OriginalFile.Ext())
+	fm.SetFilename(attachment.OriginalFile)
 
 	if err := fm.Convert(attachment.OriginalFile.Filepath, convert); err != nil {
 		return nil, err
