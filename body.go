@@ -8,17 +8,17 @@ import (
 )
 
 // Upload body info.
-type Body struct {
+type body struct {
 	XFile     *os.File
-	Body      io.Reader
+	body      io.Reader
 	MR        *multipart.Reader
 	Available bool
 }
 
-// Check exists body in xfile and return Body.
-func NewBody(xfile string, req_body io.Reader) (*Body, error) {
+// Check exists body in xfile and return body.
+func newBody(xfile string, req_body io.Reader) (*body, error) {
 	if xfile == "" {
-		return &Body{Body: req_body, Available: true}, nil
+		return &body{body: req_body, Available: true}, nil
 	}
 
 	fh, err := os.Open(xfile)
@@ -26,11 +26,11 @@ func NewBody(xfile string, req_body io.Reader) (*Body, error) {
 		return nil, err
 	}
 
-	return &Body{XFile: fh, Body: bufio.NewReader(fh), Available: true}, nil
+	return &body{XFile: fh, body: bufio.NewReader(fh), Available: true}, nil
 }
 
 // Close filehandler of body if XFile exists.
-func (body *Body) Close() error {
+func (body *body) Close() error {
 	if body.XFile != nil {
 		return body.XFile.Close()
 	}

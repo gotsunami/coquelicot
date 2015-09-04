@@ -23,10 +23,10 @@ func TestUploadMultipart(t *testing.T) {
 	var body bytes.Buffer
 	mw := multipart.NewWriter(&body)
 
-	if err := writeMPBody(dummy+"/32509211_news_bigpic.jpg", mw); err != nil {
+	if err := writeMPbody(dummy+"/32509211_news_bigpic.jpg", mw); err != nil {
 		assert.Error(err)
 	}
-	if err := writeMPBody(dummy+"/kino.jpg", mw); err != nil {
+	if err := writeMPbody(dummy+"/kino.jpg", mw); err != nil {
 		assert.Error(err)
 	}
 
@@ -36,7 +36,7 @@ func TestUploadMultipart(t *testing.T) {
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	req.AddCookie(&http.Cookie{Name: "coquelicot", Value: "abcdef"})
 
-	files, err := Process(req, dummy+"/root_storage")
+	files, err := process(req, dummy+"/root_storage")
 	assert.Nil(err)
 	assert.Equal("kino.jpg", files[1].Filename)
 	assert.Equal("image", files[1].BaseMime)
@@ -51,7 +51,7 @@ func TestUploadBinary(t *testing.T) {
 	req.Header.Set("Content-Disposition", `attachment; filename="basta.png"`)
 	req.AddCookie(&http.Cookie{Name: "coquelicot", Value: "abcdef"})
 
-	files, err := Process(req, dummy+"/root_storage")
+	files, err := process(req, dummy+"/root_storage")
 	assert.Nil(err)
 	assert.Equal("basta.png", files[0].Filename)
 	assert.Equal("image", files[0].BaseMime)
@@ -69,19 +69,19 @@ func TestUploadChunked(t *testing.T) {
 
 	req := createChunkRequest(f, 0, 24999)
 	req.AddCookie(cookie)
-	files, err := Process(req, storage)
+	files, err := process(req, storage)
 	assert.Equal(Incomplete, err)
 	assert.Equal(25000, int(files[0].Size))
 
 	req = createChunkRequest(f, 25000, 49999)
 	req.AddCookie(cookie)
-	files, err = Process(req, storage)
+	files, err = process(req, storage)
 	assert.Equal(Incomplete, err)
 	assert.Equal(50000, int(files[0].Size))
 
 	req = createChunkRequest(f, 50000, 52096)
 	req.AddCookie(cookie)
-	files, err = Process(req, storage)
+	files, err = process(req, storage)
 	assert.Nil(err)
 	assert.Equal(52097, int(files[0].Size))
 	assert.Equal("kino.jpg", files[0].Filename)
@@ -107,12 +107,12 @@ func createChunkRequest(f *os.File, start int64, end int64) *http.Request {
 func TestTempFileChunks(t *testing.T) {
 	assert := assert.New(t)
 
-	file, err := TempFileChunks(0, dummy+"/root_storage", "abcdef", "kino.jpg")
+	file, err := tempFileChunks(0, dummy+"/root_storage", "abcdef", "kino.jpg")
 	assert.Nil(err)
 	assert.NotNil(file)
 }
 
-func writeMPBody(fname string, mw *multipart.Writer) error {
+func writeMPbody(fname string, mw *multipart.Writer) error {
 	fw, _ := mw.CreateFormFile("files[]", filepath.Base(fname))
 	f, err := os.Open(fname)
 	if err != nil {

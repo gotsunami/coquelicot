@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateAttachment(t *testing.T) {
+func TestCreateattachment(t *testing.T) {
 	assert := assert.New(t)
 
 	ofile := originalImageFile()
@@ -22,16 +22,16 @@ func TestCreateAttachment(t *testing.T) {
 	assert.Equal(data["type"], "image")
 }
 
-func originalImageFile() *OriginalFile {
-	return &OriginalFile{
+func originalImageFile() *originalFile {
+	return &originalFile{
 		BaseMime: "image",
 		Filepath: dummy + "/32509211_news_bigpic.jpg",
 		Filename: "32509211_news_bigpic.jpg",
 	}
 }
 
-func originalPdfFile() *OriginalFile {
-	return &OriginalFile{
+func originalPdfFile() *originalFile {
+	return &originalFile{
 		BaseMime: "application",
 		Filepath: dummy + "/Learning-Go-latest.pdf",
 		Filename: "Learning-Go-latest.pdf",

@@ -10,18 +10,18 @@ import (
 
 type FileManager interface {
 	Convert(string, string) error
-	SetFilename(*OriginalFile)
+	SetFilename(*originalFile)
 	ToJson() map[string]interface{}
 }
 
 type FileBaseManager struct {
-	Dir      *DirManager
+	Dir      *dirManager
 	Version  string
 	Filename string
 }
 
 // Return FileManager for given base mime and version.
-func NewFileManager(dm *DirManager, mime_base, version string) FileManager {
+func NewFileManager(dm *dirManager, mime_base, version string) FileManager {
 	fbm := &FileBaseManager{Dir: dm, Version: version}
 	fdm := &FileDefaultManager{FileBaseManager: fbm}
 	switch mime_base {
@@ -31,7 +31,7 @@ func NewFileManager(dm *DirManager, mime_base, version string) FileManager {
 	return fdm
 }
 
-func (fbm *FileBaseManager) SetFilename(file *OriginalFile) {
+func (fbm *FileBaseManager) SetFilename(file *originalFile) {
 	ext := filepath.Ext(file.Filename)
 	fbm.Filename = file.Filename[:len(file.Filename)-len(ext)] + "-" + fbm.Version + file.Ext()
 	if fbm.Version == "original" {

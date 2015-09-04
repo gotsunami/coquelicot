@@ -11,14 +11,14 @@ import (
 )
 
 // Directory mananger
-type DirManager struct {
+type dirManager struct {
 	Root string
 	Path string
 }
 
-// Prepare DirManager given root, mime.
-func CreateDir(root, mime string) (*DirManager, error) {
-	dm := NewDirManager(root)
+// Prepare dirManager given root, mime.
+func CreateDir(root, mime string) (*dirManager, error) {
+	dm := newDirManager(root)
 
 	dm.CalcPath(mime)
 	if err := dm.Create(); err != nil {
@@ -28,9 +28,9 @@ func CreateDir(root, mime string) (*DirManager, error) {
 	return dm, nil
 }
 
-// Check path and return DirManager.
-func CheckDir(root, path string) (*DirManager, error) {
-	dm := NewDirManager(root)
+// Check path and return dirManager.
+func CheckDir(root, path string) (*dirManager, error) {
+	dm := newDirManager(root)
 
 	if m, _ := filepath.Match("/[a-z]*/[0-9]*/[0-9a-z]*/[0-9a-z]*", path); m != true {
 		return nil, errors.New("dir: path does not match the pattern")
@@ -40,23 +40,23 @@ func CheckDir(root, path string) (*DirManager, error) {
 	return dm, nil
 }
 
-// NewDirManager returns a new DirManager given a root.
-func NewDirManager(root string) *DirManager {
-	return &DirManager{Root: root}
+// newDirManager returns a new dirManager given a root.
+func newDirManager(root string) *dirManager {
+	return &dirManager{Root: root}
 }
 
 // Return absolute path for directory
-func (dm *DirManager) Abs() string {
+func (dm *dirManager) Abs() string {
 	return filepath.Join(dm.Root, dm.Path)
 }
 
 // Create directory obtained by concatenating the root and path.
-func (dm *DirManager) Create() error {
+func (dm *dirManager) Create() error {
 	return os.MkdirAll(dm.Root+dm.Path, 0755)
 }
 
 // Generate path given mime and date.
-func (dm *DirManager) CalcPath(mime string) {
+func (dm *dirManager) CalcPath(mime string) {
 	date := time.Now()
 	dm.Path = fmt.Sprintf("/%s/%d/%s/%s", mime, date.Year(), yearDay(date), containerName(date))
 }

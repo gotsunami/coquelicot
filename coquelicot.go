@@ -12,6 +12,6 @@ func (s *Storage) StorageDir() string {
 	return s.output
 }
 
-func NewStorage(storageDir string) *Storage {
-	return &Storage{output: storageDir}
+func NewStorage(rootDir string) *Storage {
+	return &Storage{output: rootDir}
 }

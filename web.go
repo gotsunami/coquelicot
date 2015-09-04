@@ -75,7 +75,7 @@ func (s *Storage) UploadHandler(c *gin.Context) {
 	}
 
 	// Performs the processing of writing data into chunk files.
-	files, err := Process(c.Request, s.StorageDir())
+	files, err := process(c.Request, s.StorageDir())
 
 	if err == Incomplete {
 		c.JSON(http.StatusOK, gin.H{

@@ -17,14 +17,14 @@ import (
 var Incomplete = errors.New("Incomplete")
 
 // Structure describes the state of the original file.
-type OriginalFile struct {
+type originalFile struct {
 	BaseMime string
 	Filepath string
 	Filename string
 	Size     int64
 }
 
-func (ofile *OriginalFile) Ext() string {
+func (ofile *originalFile) Ext() string {
 	return strings.ToLower(filepath.Ext(ofile.Filename))
 }
 
@@ -33,17 +33,17 @@ func (ofile *OriginalFile) Ext() string {
 // Returns an array of the original files and error.
 // If you load a portion of the file, chunk, it will be stored in err error Incomplete,
 // and in an array of a single file. File size will fit the current size.
-func Process(req *http.Request, storage string) ([]*OriginalFile, error) {
+func process(req *http.Request, storage string) ([]*originalFile, error) {
 	meta, err := ParseMeta(req)
 	if err != nil {
 		return nil, err
 	}
 
-	body, err := NewBody(req.Header.Get("X-File"), req.Body)
+	body, err := newBody(req.Header.Get("X-File"), req.Body)
 	if err != nil {
 		return nil, err
 	}
-	up := &Uploader{Root: storage, Meta: meta, Body: body}
+	up := &uploader{Root: storage, Meta: meta, body: body}
 
 	files, err := up.SaveFiles()
 	if err == Incomplete {
@@ -57,15 +57,15 @@ func Process(req *http.Request, storage string) ([]*OriginalFile, error) {
 }
 
 // Upload manager.
-type Uploader struct {
+type uploader struct {
 	Root string
 	Meta *Meta
-	Body *Body
+	body *body
 }
 
 // Function SaveFiles sequentially loads the original files or chunk's.
-func (up *Uploader) SaveFiles() ([]*OriginalFile, error) {
-	files := make([]*OriginalFile, 0)
+func (up *uploader) SaveFiles() ([]*originalFile, error) {
+	files := make([]*originalFile, 0)
 	for {
 		ofile, err := up.SaveFile()
 		if err == io.EOF {
@@ -95,13 +95,13 @@ func (up *Uploader) SaveFiles() ([]*OriginalFile, error) {
 // If the query specified header Content-Range,
 // and the size of the resulting file does not match, it returns an error Incomplete.
 // Otherwise, defines the basic mime type, and returns the original file.
-func (up *Uploader) SaveFile() (*OriginalFile, error) {
+func (up *uploader) SaveFile() (*originalFile, error) {
 	body, filename, err := up.Reader()
 	if err != nil {
 		return nil, err
 	}
 
-	temp_file, err := up.TempFile()
+	temp_file, err := up.tempFile()
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (up *Uploader) SaveFile() (*OriginalFile, error) {
 		return nil, err
 	}
 
-	ofile := &OriginalFile{Filename: filename, Filepath: temp_file.Name(), Size: fi.Size()}
+	ofile := &originalFile{Filename: filename, Filepath: temp_file.Name(), Size: fi.Size()}
 
 	if up.Meta.Range != nil && ofile.Size != up.Meta.Range.Size {
 		return ofile, Incomplete
@@ -133,13 +133,13 @@ func (up *Uploader) SaveFile() (*OriginalFile, error) {
 // Returns the reader to read the file or chunk of request body and the original file name.
 // If the request header Content-Type is multipart/form-data, returns the next copy part.
 // If all of part read the case of binary loading read the request body, an error is returned io.EOF.
-func (up *Uploader) Reader() (io.Reader, string, error) {
+func (up *uploader) Reader() (io.Reader, string, error) {
 	if up.Meta.MediaType == "multipart/form-data" {
-		if up.Body.MR == nil {
-			up.Body.MR = multipart.NewReader(up.Body.Body, up.Meta.Boundary)
+		if up.body.MR == nil {
+			up.body.MR = multipart.NewReader(up.body.body, up.Meta.Boundary)
 		}
 		for {
-			part, err := up.Body.MR.NextPart()
+			part, err := up.body.MR.NextPart()
 			if err != nil {
 				return nil, "", err
 			}
@@ -149,25 +149,25 @@ func (up *Uploader) Reader() (io.Reader, string, error) {
 		}
 	}
 
-	if !up.Body.Available {
+	if !up.body.Available {
 		return nil, "", io.EOF
 	}
 
-	up.Body.Available = false
+	up.body.Available = false
 
-	return up.Body.Body, up.Meta.Filename, nil
+	return up.body.body, up.Meta.Filename, nil
 }
 
 // Returns a temporary file to download the file or resume chunk.
-func (up *Uploader) TempFile() (*os.File, error) {
+func (up *uploader) tempFile() (*os.File, error) {
 	if up.Meta.Range == nil {
-		return TempFile()
+		return tempFile()
 	}
-	return TempFileChunks(up.Meta.Range.Start, up.Root, up.Meta.UploadSid, up.Meta.Filename)
+	return tempFileChunks(up.Meta.Range.Start, up.Root, up.Meta.UploadSid, up.Meta.Filename)
 }
 
 // Returns the newly created temporary file.
-func TempFile() (*os.File, error) {
+func tempFile() (*os.File, error) {
 	return ioutil.TempFile(os.TempDir(), "coquelicot")
 }
 
@@ -176,7 +176,7 @@ func TempFile() (*os.File, error) {
 // File located in the directory chunks storage root directory.
 // Before returning the file pointer is shifted by the value of offset,
 // in a situation where the pieces are loaded from the second to the last.
-func TempFileChunks(offset int64, storage, upload_sid, user_filename string) (*os.File, error) {
+func tempFileChunks(offset int64, storage, upload_sid, user_filename string) (*os.File, error) {
 	hasher := md5.New()
 	hasher.Write([]byte(upload_sid + user_filename))
 	filename := hex.EncodeToString(hasher.Sum(nil))
@@ -201,7 +201,7 @@ func TempFileChunks(offset int64, storage, upload_sid, user_filename string) (*o
 }
 
 // The function writes a temporary file value from reader.
-func (up *Uploader) Write(temp_file *os.File, body io.Reader) error {
+func (up *uploader) Write(temp_file *os.File, body io.Reader) error {
 	var err error
 	if up.Meta.Range == nil {
 		_, err = io.Copy(temp_file, body)

@@ -4,23 +4,23 @@ import (
 	"os"
 )
 
-// Attachment contain info about directory, base mime type and all files saved.
-type Attachment struct {
-	OriginalFile *OriginalFile
-	Dir          *DirManager
+// attachment contain info about directory, base mime type and all files saved.
+type attachment struct {
+	originalFile *originalFile
+	Dir          *dirManager
 	Versions     map[string]FileManager
 }
 
 // Function receive root directory, original file, convertion parameters.
-// Return Attachment saved. The final chunk is deleted if delChunk is true.
-func Create(storage string, ofile *OriginalFile, converts map[string]string, delChunk bool) (*Attachment, error) {
+// Return attachment saved. The final chunk is deleted if delChunk is true.
+func Create(storage string, ofile *originalFile, converts map[string]string, delChunk bool) (*attachment, error) {
 	dm, err := CreateDir(storage, ofile.BaseMime)
 	if err != nil {
 		return nil, err
 	}
 
-	attachment := &Attachment{
-		OriginalFile: ofile,
+	at := &attachment{
+		originalFile: ofile,
 		Dir:          dm,
 		Versions:     make(map[string]FileManager),
 	}
@@ -29,48 +29,48 @@ func Create(storage string, ofile *OriginalFile, converts map[string]string, del
 		converts["thumbnail"] = "120x90"
 	}
 
-	makeVersion := func(a *Attachment, version, convert string) error {
-		fm, err := attachment.CreateVersion(version, convert)
+	makeVersion := func(a *attachment, version, convert string) error {
+		fm, err := at.CreateVersion(version, convert)
 		if err != nil {
 			return err
 		}
-		attachment.Versions[version] = fm
+		at.Versions[version] = fm
 		return nil
 	}
 
-	if err := makeVersion(attachment, "original", ""); err != nil {
+	if err := makeVersion(at, "original", ""); err != nil {
 		return nil, err
 	}
 
 	if makeThumbnail {
-		if err := makeVersion(attachment, "thumbnail", converts["thumbnail"]); err != nil {
+		if err := makeVersion(at, "thumbnail", converts["thumbnail"]); err != nil {
 			return nil, err
 		}
 	}
 
 	if delChunk {
-		return attachment, os.Remove(attachment.OriginalFile.Filepath)
+		return at, os.Remove(at.originalFile.Filepath)
 	}
-	return attachment, nil
+	return at, nil
 }
 
 // Directly save single version and return FileManager.
-func (attachment *Attachment) CreateVersion(version string, convert string) (FileManager, error) {
-	fm := NewFileManager(attachment.Dir, attachment.OriginalFile.BaseMime, version)
-	fm.SetFilename(attachment.OriginalFile)
+func (attachment *attachment) CreateVersion(version string, convert string) (FileManager, error) {
+	fm := NewFileManager(attachment.Dir, attachment.originalFile.BaseMime, version)
+	fm.SetFilename(attachment.originalFile)
 
-	if err := fm.Convert(attachment.OriginalFile.Filepath, convert); err != nil {
+	if err := fm.Convert(attachment.originalFile.Filepath, convert); err != nil {
 		return nil, err
 	}
 
 	return fm, nil
 }
 
-func (attachment *Attachment) ToJson() map[string]interface{} {
+func (attachment *attachment) ToJson() map[string]interface{} {
 	data := make(map[string]interface{})
-	data["type"] = attachment.OriginalFile.BaseMime
+	data["type"] = attachment.originalFile.BaseMime
 	data["dir"] = attachment.Dir.Path
-	data["name"] = attachment.OriginalFile.Filename
+	data["name"] = attachment.originalFile.Filename
 	versions := make(map[string]interface{})
 	for version, fm := range attachment.Versions {
 		versions[version] = fm.ToJson()
