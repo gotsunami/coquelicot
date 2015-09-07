@@ -8,8 +8,8 @@ import (
 type Adapter func(http.Handler) http.Handler
 
 func Adapt(h http.Handler, adapters ...Adapter) http.Handler {
-	for _, adapter := range adapters {
-		h = adapter(h)
+	for k := len(adapters) - 1; k >= 0; k-- {
+		h = adapters[k](h)
 	}
 	return h
 }
