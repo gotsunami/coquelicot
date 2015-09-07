@@ -18,6 +18,7 @@ import (
 type H map[string]interface{}
 
 func toJSON(w http.ResponseWriter, code int, obj interface{}) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	b, err := json.Marshal(obj)
 	if err != nil {
