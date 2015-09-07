@@ -4,9 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 
-	"github.com/gin-gonic/contrib/static"
-	"github.com/gin-gonic/gin"
 	"github.com/gotsunami/coquelicot"
 )
 
@@ -20,15 +19,15 @@ func main() {
 	s := coquelicot.NewStorage(*storage)
 	s.Option(coquelicot.Convert(*convert))
 
-	r := gin.Default()
-	r.Use(coquelicot.CORSMiddleware())
-	r.Use(static.ServeRoot("/", s.StorageDir()))
-
-	r.POST("/files", s.UploadHandler)
-	r.GET("/files", s.FilesHandler)
-	r.GET("/resume", s.ResumeHandler)
+	routes := map[string]http.HandlerFunc{
+		"/files":  s.UploadHandler,
+		"/resume": s.ResumeHandler,
+	}
+	for path, handler := range routes {
+		http.Handle(path, coquelicot.CORSMiddleware()(http.HandlerFunc(handler)))
+	}
 
 	log.Printf("Storage place in: %s", s.StorageDir())
 	log.Printf("Start server on %s", *host)
-	r.Run(*host)
+	log.Fatal(http.ListenAndServe(*host, nil))
 }

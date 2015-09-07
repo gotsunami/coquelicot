@@ -5,27 +5,38 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"path"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	//	"github.com/gin-gonic/gin"
 	"github.com/pborman/uuid"
 )
 
-func (s *Storage) FilesHandler(c *gin.Context) {
-	status := http.StatusOK
-	// FIXME: nil content
-	c.JSON(status, gin.H{"status": http.StatusText(status), "files": nil})
+type H map[string]interface{}
+
+func toJSON(w http.ResponseWriter, code int, obj interface{}) {
+	w.WriteHeader(code)
+	b, err := json.Marshal(obj)
+	if err != nil {
+		log.Println("error:", err.Error())
+		return
+	}
+	if _, err := w.Write(b); err != nil {
+		log.Println("error:", err.Error())
+		return
+	}
 }
 
 // ResumeHandler allows resuming a file upload.
-func (s *Storage) ResumeHandler(c *gin.Context) {
+//func (s *Storage) ResumeHandler(c *gin.Context) {
+func (s *Storage) ResumeHandler(w http.ResponseWriter, r *http.Request) {
 	status := http.StatusOK
-	filename := c.Request.URL.Query().Get("file")
+	filename := r.URL.Query().Get("file")
 
-	cookie, _ := c.Request.Cookie("coquelicot")
+	cookie, _ := r.Cookie("coquelicot")
 	offset := int64(0)
 
 	if cookie != nil {
@@ -35,7 +46,7 @@ func (s *Storage) ResumeHandler(c *gin.Context) {
 		fi, err := os.Stat(path.Join(s.output, "chunks", chunkname))
 		if err != nil {
 			if !os.IsNotExist(err) {
-				c.JSON(http.StatusInternalServerError, gin.H{
+				toJSON(w, http.StatusInternalServerError, H{
 					"status": http.StatusText(http.StatusInternalServerError),
 					"error":  fmt.Sprintf("Resume error: %q", err.Error()),
 				})
@@ -46,14 +57,26 @@ func (s *Storage) ResumeHandler(c *gin.Context) {
 		}
 	}
 
-	c.JSON(status, gin.H{"status": http.StatusText(status), "file": gin.H{"size": offset}})
+	toJSON(w, status, H{"status": http.StatusText(status), "file": H{"size": offset}})
 }
 
 // UploadHandler is the endpoint for uploading and storing files.
-func (s *Storage) UploadHandler(c *gin.Context) {
-	converts, err := getConvertParams(c.Request)
+//func (s *Storage) UploadHandler(c *gin.Context) {
+func (s *Storage) UploadHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "GET" {
+		status := http.StatusOK
+		// FIXME: nil content
+		toJSON(w, status, H{"status": http.StatusText(status), "files": nil})
+		return
+	}
+	if r.Method != "POST" {
+		http.NotFound(w, r)
+		return
+	}
+
+	converts, err := getConvertParams(r)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		toJSON(w, http.StatusBadRequest, H{
 			"status": "error",
 			"error":  fmt.Sprintf("Query params: %s", err),
 		})
@@ -62,7 +85,7 @@ func (s *Storage) UploadHandler(c *gin.Context) {
 	converts["original"] = ""
 
 	// File upload cookie so we can keep track of chunks.
-	cookie, _ := c.Request.Cookie("coquelicot")
+	cookie, _ := r.Cookie("coquelicot")
 	if cookie == nil {
 		cookie = &http.Cookie{
 			Name:    "coquelicot",
@@ -70,22 +93,22 @@ func (s *Storage) UploadHandler(c *gin.Context) {
 			Expires: time.Now().Add(2 * 24 * time.Hour),
 			Path:    "/",
 		}
-		c.Request.AddCookie(cookie)
-		http.SetCookie(c.Writer, cookie)
+		r.AddCookie(cookie)
+		http.SetCookie(w, cookie)
 	}
 
 	// Performs the processing of writing data into chunk files.
-	files, err := process(c.Request, s.StorageDir())
+	files, err := process(r, s.StorageDir())
 
 	if err == incomplete {
-		c.JSON(http.StatusOK, gin.H{
+		toJSON(w, http.StatusOK, H{
 			"status": http.StatusText(http.StatusOK),
-			"file":   gin.H{"size": files[0].Size},
+			"file":   H{"size": files[0].Size},
 		})
 		return
 	}
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		toJSON(w, http.StatusBadRequest, H{
 			"status": http.StatusText(http.StatusBadRequest),
 			"error":  fmt.Sprintf("Upload error: %q", err.Error()),
 		})
@@ -111,7 +134,7 @@ func (s *Storage) UploadHandler(c *gin.Context) {
 		data = append(data, attachment.ToJson())
 	}
 
-	c.JSON(status, gin.H{"status": http.StatusText(status), "files": data})
+	toJSON(w, status, H{"status": http.StatusText(status), "files": data})
 }
 
 // Get parameters for convert from Request query string
@@ -130,23 +153,4 @@ func getConvertParams(req *http.Request) (map[string]string, error) {
 	}
 
 	return convert, nil
-}
-
-func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, PATCH, DELETE")
-		c.Writer.Header().Set("Access-Control-Allow-Headers",
-			"Content-Type, Content-Length, Accept-Encoding, Content-Range, Content-Disposition, Authorization")
-		// Since we need to support cross-domain cookies, we must support XHR requests
-		// with credentials, so the Access-Control-Allow-Credentials header is required
-		// and Access-Control-Allow-Origin cannot be equal to "*" but reply with the same Origin.
-		// See https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS.
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Add("Access-Control-Allow-Origin", c.Request.Header.Get("Origin"))
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(200)
-			return
-		}
-	}
 }
