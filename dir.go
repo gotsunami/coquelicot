@@ -1,8 +1,10 @@
 package coquelicot
 
 import (
+	"crypto/sha1"
 	"errors"
 	"fmt"
+	"io"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -57,8 +59,9 @@ func (dm *dirManager) create() error {
 
 // Generate path given mime and date.
 func (dm *dirManager) CalcPath(mime string) {
-	date := time.Now()
-	dm.Path = fmt.Sprintf("/%s/%d/%s/%s", mime, date.Year(), yearDay(date), containerName(date))
+	h := sha1.New()
+	io.WriteString(h, fmt.Sprintf("%d", time.Now().UnixNano()))
+	dm.Path = fmt.Sprintf("/%x", h.Sum(nil))
 }
 
 func yearDay(t time.Time) string {
