@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gotsunami/coquelicot"
 )
@@ -19,6 +20,8 @@ func main() {
 	s := coquelicot.NewStorage(*storage)
 	s.Option(coquelicot.Convert(*convert))
 
+	logger := log.New(os.Stdout, "", log.LstdFlags)
+
 	routes := map[string]http.HandlerFunc{
 		"/files":  s.UploadHandler,
 		"/resume": s.ResumeHandler,
@@ -26,7 +29,7 @@ func main() {
 	for path, handler := range routes {
 		http.Handle(path, coquelicot.Adapt(http.HandlerFunc(handler),
 			coquelicot.CORSMiddleware(),
-			coquelicot.LogMiddleware()),
+			coquelicot.LogMiddleware(logger)),
 		)
 	}
 

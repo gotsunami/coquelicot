@@ -36,11 +36,15 @@ func CORSMiddleware() Adapter {
 	}
 }
 
-func LogMiddleware() Adapter {
+func LogMiddleware(logger *log.Logger) Adapter {
 	return func(h http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			h.ServeHTTP(w, r)
-			log.Printf("%s %s [%s]\n", r.Method, r.URL.Path, r.RemoteAddr)
+			path := r.URL.Path
+			if len(r.URL.RawQuery) > 0 {
+				path += "?" + r.URL.RawQuery
+			}
+			logger.Printf("%s %s [%s]\n", r.Method, path, r.RemoteAddr)
 		})
 	}
 }
