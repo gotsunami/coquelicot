@@ -1,10 +1,18 @@
 package coquelicot
 
 import (
+	"log"
 	"net/http"
 )
 
 type Adapter func(http.Handler) http.Handler
+
+func Adapt(h http.Handler, adapters ...Adapter) http.Handler {
+	for _, adapter := range adapters {
+		h = adapter(h)
+	}
+	return h
+}
 
 func CORSMiddleware() Adapter {
 	return func(h http.Handler) http.Handler {
@@ -24,6 +32,15 @@ func CORSMiddleware() Adapter {
 			}
 
 			h.ServeHTTP(w, r)
+		})
+	}
+}
+
+func LogMiddleware() Adapter {
+	return func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			h.ServeHTTP(w, r)
+			log.Printf("%s %s [%s]\n", r.Method, r.URL.Path, r.RemoteAddr)
 		})
 	}
 }

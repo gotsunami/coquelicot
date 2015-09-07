@@ -24,7 +24,10 @@ func main() {
 		"/resume": s.ResumeHandler,
 	}
 	for path, handler := range routes {
-		http.Handle(path, coquelicot.CORSMiddleware()(http.HandlerFunc(handler)))
+		http.Handle(path, coquelicot.Adapt(http.HandlerFunc(handler),
+			coquelicot.CORSMiddleware(),
+			coquelicot.LogMiddleware()),
+		)
 	}
 
 	log.Printf("Storage place in: %s", s.StorageDir())
