@@ -51,7 +51,7 @@ func (s *Storage) ResumeHandler(c *gin.Context) {
 
 // UploadHandler is the endpoint for uploading and storing files.
 func (s *Storage) UploadHandler(c *gin.Context) {
-	converts, err := GetConvertParams(c.Request)
+	converts, err := getConvertParams(c.Request)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"status": "error",
@@ -77,7 +77,7 @@ func (s *Storage) UploadHandler(c *gin.Context) {
 	// Performs the processing of writing data into chunk files.
 	files, err := process(c.Request, s.StorageDir())
 
-	if err == Incomplete {
+	if err == incomplete {
 		c.JSON(http.StatusOK, gin.H{
 			"status": http.StatusText(http.StatusOK),
 			"file":   gin.H{"size": files[0].Size},
@@ -98,7 +98,7 @@ func (s *Storage) UploadHandler(c *gin.Context) {
 
 	for _, ofile := range files {
 		// true to delete final chunk
-		attachment, err := Create(s.StorageDir(), ofile, converts, true)
+		attachment, err := create(s.StorageDir(), ofile, converts, true)
 		if err != nil {
 			data = append(data, map[string]interface{}{
 				"name":  ofile.Filename,
@@ -115,7 +115,7 @@ func (s *Storage) UploadHandler(c *gin.Context) {
 }
 
 // Get parameters for convert from Request query string
-func GetConvertParams(req *http.Request) (map[string]string, error) {
+func getConvertParams(req *http.Request) (map[string]string, error) {
 	raw_converts := req.URL.Query().Get("converts")
 
 	if raw_converts == "" {

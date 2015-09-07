@@ -4,16 +4,16 @@ import (
 	"os"
 )
 
-type FileDefaultManager struct {
-	*FileBaseManager
+type fileDefaultManager struct {
+	*fileBaseManager
 	Size int64
 }
 
-func (fdm *FileDefaultManager) Convert(src string, convert string) error {
+func (fdm *fileDefaultManager) convert(src string, convert string) error {
 	return fdm.rawCopy(src, convert)
 }
 
-func (fdm *FileDefaultManager) ToJson() map[string]interface{} {
+func (fdm *fileDefaultManager) ToJson() map[string]interface{} {
 	return map[string]interface{}{
 		"url":      fdm.Url(),
 		"filename": fdm.Filename,
@@ -21,7 +21,7 @@ func (fdm *FileDefaultManager) ToJson() map[string]interface{} {
 	}
 }
 
-func (fdm *FileDefaultManager) rawCopy(src, convert string) error {
+func (fdm *fileDefaultManager) rawCopy(src, convert string) error {
 	if err := fdm.copyFile(src, fdm.Filepath()); err != nil {
 		return err
 	}

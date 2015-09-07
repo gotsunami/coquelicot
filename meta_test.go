@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestParseMeta(t *testing.T) {
+func TestparseMeta(t *testing.T) {
 	assert := assert.New(t)
 
 	req, _ := http.NewRequest("POST", "/files", nil)
@@ -16,7 +16,7 @@ func TestParseMeta(t *testing.T) {
 	req.Header.Set("Content-Disposition", `attachment; filename="picture.jpg"`)
 	req.AddCookie(&http.Cookie{Name: "coquelicot", Value: "abcdef"})
 
-	meta, err := ParseMeta(req)
+	meta, err := parseMeta(req)
 	assert.Nil(err)
 
 	assert.Equal(meta.MediaType, "multipart/form-data")

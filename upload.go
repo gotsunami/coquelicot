@@ -13,8 +13,8 @@ import (
 	"strings"
 )
 
-// Error Incomplete returned by uploader when loaded non-last chunk.
-var Incomplete = errors.New("Incomplete")
+// Error incomplete returned by uploader when loaded non-last chunk.
+var incomplete = errors.New("incomplete")
 
 // Structure describes the state of the original file.
 type originalFile struct {
@@ -31,10 +31,10 @@ func (ofile *originalFile) Ext() string {
 // Downloading files from the received request.
 // The root directory of storage, storage,  used to temporarily store chunks.
 // Returns an array of the original files and error.
-// If you load a portion of the file, chunk, it will be stored in err error Incomplete,
+// If you load a portion of the file, chunk, it will be stored in err error incomplete,
 // and in an array of a single file. File size will fit the current size.
 func process(req *http.Request, storage string) ([]*originalFile, error) {
-	meta, err := ParseMeta(req)
+	meta, err := parseMeta(req)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func process(req *http.Request, storage string) ([]*originalFile, error) {
 	up := &uploader{Root: storage, Meta: meta, body: body}
 
 	files, err := up.SaveFiles()
-	if err == Incomplete {
+	if err == incomplete {
 		return files, err
 	}
 	if err != nil {
@@ -59,7 +59,7 @@ func process(req *http.Request, storage string) ([]*originalFile, error) {
 // Upload manager.
 type uploader struct {
 	Root string
-	Meta *Meta
+	Meta *meta
 	body *body
 }
 
@@ -72,7 +72,7 @@ func (up *uploader) SaveFiles() ([]*originalFile, error) {
 			break
 		}
 
-		if err == Incomplete {
+		if err == incomplete {
 			files = append(files, ofile)
 			return files, err
 		}
@@ -93,7 +93,7 @@ func (up *uploader) SaveFiles() ([]*originalFile, error) {
 // Writes data from the request body into a temporary file.
 // Specifies the size of the resulting temporary file.
 // If the query specified header Content-Range,
-// and the size of the resulting file does not match, it returns an error Incomplete.
+// and the size of the resulting file does not match, it returns an error incomplete.
 // Otherwise, defines the basic mime type, and returns the original file.
 func (up *uploader) SaveFile() (*originalFile, error) {
 	body, filename, err := up.Reader()
@@ -119,7 +119,7 @@ func (up *uploader) SaveFile() (*originalFile, error) {
 	ofile := &originalFile{Filename: filename, Filepath: temp_file.Name(), Size: fi.Size()}
 
 	if up.Meta.Range != nil && ofile.Size != up.Meta.Range.Size {
-		return ofile, Incomplete
+		return ofile, incomplete
 	}
 
 	ofile.BaseMime, err = identifyMime(ofile.Filepath)

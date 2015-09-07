@@ -8,33 +8,33 @@ import (
 )
 
 // Info about request headers
-type Meta struct {
+type meta struct {
 	MediaType string
 	Boundary  string
-	Range     *Range
+	Range     *dataRange
 	Filename  string
 	UploadSid string
 }
 
-type Range struct {
+type dataRange struct {
 	Start int64
 	End   int64
 	Size  int64
 }
 
 // Parse request headers and make Meta.
-func ParseMeta(req *http.Request) (*Meta, error) {
-	meta := &Meta{}
+func parseMeta(req *http.Request) (*meta, error) {
+	m := &meta{}
 
-	if err := meta.parseContentType(req.Header.Get("Content-Type")); err != nil {
+	if err := m.parseContentType(req.Header.Get("Content-Type")); err != nil {
 		return nil, err
 	}
 
-	if err := meta.parseContentRange(req.Header.Get("Content-Range")); err != nil {
+	if err := m.parseContentRange(req.Header.Get("Content-Range")); err != nil {
 		return nil, err
 	}
 
-	if err := meta.parseContentDisposition(req.Header.Get("Content-Disposition")); err != nil {
+	if err := m.parseContentDisposition(req.Header.Get("Content-Disposition")); err != nil {
 		return nil, err
 	}
 
@@ -43,15 +43,15 @@ func ParseMeta(req *http.Request) (*Meta, error) {
 		return nil, err
 	}
 	if cookie != nil {
-		meta.UploadSid = cookie.Value
+		m.UploadSid = cookie.Value
 	}
 
-	return meta, nil
+	return m, nil
 }
 
-func (meta *Meta) parseContentType(ct string) error {
+func (m *meta) parseContentType(ct string) error {
 	if ct == "" {
-		meta.MediaType = "application/octet-stream"
+		m.MediaType = "application/octet-stream"
 		return nil
 	}
 
@@ -66,16 +66,16 @@ func (meta *Meta) parseContentType(ct string) error {
 			return errors.New("meta: boundary not defined")
 		}
 
-		meta.MediaType = mediatype
-		meta.Boundary = boundary
+		m.MediaType = mediatype
+		m.Boundary = boundary
 	} else {
-		meta.MediaType = "application/octet-stream"
+		m.MediaType = "application/octet-stream"
 	}
 
 	return nil
 }
 
-func (meta *Meta) parseContentRange(cr string) error {
+func (m *meta) parseContentRange(cr string) error {
 	if cr == "" {
 		return nil
 	}
@@ -87,12 +87,12 @@ func (meta *Meta) parseContentRange(cr string) error {
 		return err
 	}
 
-	meta.Range = &Range{Start: start, End: end, Size: size}
+	m.Range = &dataRange{Start: start, End: end, Size: size}
 
 	return nil
 }
 
-func (meta *Meta) parseContentDisposition(cd string) error {
+func (m *meta) parseContentDisposition(cd string) error {
 	if cd == "" {
 		return nil
 	}
@@ -107,7 +107,7 @@ func (meta *Meta) parseContentDisposition(cd string) error {
 		return errors.New("meta: filename in Content-Disposition not defined")
 	}
 
-	meta.Filename = filename
+	m.Filename = filename
 
 	return nil
 }

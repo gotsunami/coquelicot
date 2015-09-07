@@ -6,14 +6,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateattachment(t *testing.T) {
+func TestCreateAttachment(t *testing.T) {
 	assert := assert.New(t)
 
 	ofile := originalImageFile()
 	storage := dummy + "/root_storage"
 	converts := map[string]string{"original": "", "thumbnail": "120x80"}
 
-	attachment, err := Create(storage, ofile, converts, false)
+	attachment, err := create(storage, ofile, converts, false)
 	assert.Nil(err)
 	// Convert option not set
 	assert.Equal(len(attachment.Versions), 1)

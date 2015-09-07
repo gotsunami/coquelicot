@@ -70,13 +70,13 @@ func TestUploadChunked(t *testing.T) {
 	req := createChunkRequest(f, 0, 24999)
 	req.AddCookie(cookie)
 	files, err := process(req, storage)
-	assert.Equal(Incomplete, err)
+	assert.Equal(incomplete, err)
 	assert.Equal(25000, int(files[0].Size))
 
 	req = createChunkRequest(f, 25000, 49999)
 	req.AddCookie(cookie)
 	files, err = process(req, storage)
-	assert.Equal(Incomplete, err)
+	assert.Equal(incomplete, err)
 	assert.Equal(50000, int(files[0].Size))
 
 	req = createChunkRequest(f, 50000, 52096)

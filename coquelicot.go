@@ -1,3 +1,4 @@
+// Package coquelicot provides (chunked) file upload capability (with resume).
 package coquelicot
 
 type Storage struct {

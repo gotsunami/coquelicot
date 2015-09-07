@@ -8,13 +8,13 @@ import (
 type attachment struct {
 	originalFile *originalFile
 	Dir          *dirManager
-	Versions     map[string]FileManager
+	Versions     map[string]fileManager
 }
 
 // Function receive root directory, original file, convertion parameters.
 // Return attachment saved. The final chunk is deleted if delChunk is true.
-func Create(storage string, ofile *originalFile, converts map[string]string, delChunk bool) (*attachment, error) {
-	dm, err := CreateDir(storage, ofile.BaseMime)
+func create(storage string, ofile *originalFile, converts map[string]string, delChunk bool) (*attachment, error) {
+	dm, err := createDir(storage, ofile.BaseMime)
 	if err != nil {
 		return nil, err
 	}
@@ -22,7 +22,7 @@ func Create(storage string, ofile *originalFile, converts map[string]string, del
 	at := &attachment{
 		originalFile: ofile,
 		Dir:          dm,
-		Versions:     make(map[string]FileManager),
+		Versions:     make(map[string]fileManager),
 	}
 
 	if ofile.BaseMime == "image" {
@@ -30,7 +30,7 @@ func Create(storage string, ofile *originalFile, converts map[string]string, del
 	}
 
 	makeVersion := func(a *attachment, version, convert string) error {
-		fm, err := at.CreateVersion(version, convert)
+		fm, err := at.createVersion(version, convert)
 		if err != nil {
 			return err
 		}
@@ -54,12 +54,12 @@ func Create(storage string, ofile *originalFile, converts map[string]string, del
 	return at, nil
 }
 
-// Directly save single version and return FileManager.
-func (attachment *attachment) CreateVersion(version string, convert string) (FileManager, error) {
-	fm := NewFileManager(attachment.Dir, attachment.originalFile.BaseMime, version)
+// Directly save single version and return fileManager.
+func (attachment *attachment) createVersion(version string, convert string) (fileManager, error) {
+	fm := newFileManager(attachment.Dir, attachment.originalFile.BaseMime, version)
 	fm.SetFilename(attachment.originalFile)
 
-	if err := fm.Convert(attachment.originalFile.Filepath, convert); err != nil {
+	if err := fm.convert(attachment.originalFile.Filepath, convert); err != nil {
 		return nil, err
 	}
 

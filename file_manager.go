@@ -8,30 +8,30 @@ import (
 	"time"
 )
 
-type FileManager interface {
-	Convert(string, string) error
+type fileManager interface {
+	convert(string, string) error
 	SetFilename(*originalFile)
 	ToJson() map[string]interface{}
 }
 
-type FileBaseManager struct {
+type fileBaseManager struct {
 	Dir      *dirManager
 	Version  string
 	Filename string
 }
 
-// Return FileManager for given base mime and version.
-func NewFileManager(dm *dirManager, mime_base, version string) FileManager {
-	fbm := &FileBaseManager{Dir: dm, Version: version}
-	fdm := &FileDefaultManager{FileBaseManager: fbm}
+// Return fileManager for given base mime and version.
+func newFileManager(dm *dirManager, mime_base, version string) fileManager {
+	fbm := &fileBaseManager{Dir: dm, Version: version}
+	fdm := &fileDefaultManager{fileBaseManager: fbm}
 	switch mime_base {
 	case "image":
-		return &FileImageManager{FileDefaultManager: fdm, convert: makeThumbnail}
+		return &fileImageManager{fileDefaultManager: fdm, thumbnail: makeThumbnail}
 	}
 	return fdm
 }
 
-func (fbm *FileBaseManager) SetFilename(file *originalFile) {
+func (fbm *fileBaseManager) SetFilename(file *originalFile) {
 	ext := filepath.Ext(file.Filename)
 	fbm.Filename = file.Filename[:len(file.Filename)-len(ext)] + "-" + fbm.Version + file.Ext()
 	if fbm.Version == "original" {
@@ -39,17 +39,17 @@ func (fbm *FileBaseManager) SetFilename(file *originalFile) {
 	}
 }
 
-func (fbm *FileBaseManager) Filepath() string {
+func (fbm *fileBaseManager) Filepath() string {
 	return filepath.Join(fbm.Dir.Abs(), fbm.Filename)
 }
 
-func (fbm *FileBaseManager) Url() string {
+func (fbm *fileBaseManager) Url() string {
 	return filepath.Join(fbm.Dir.Path, fbm.Filename)
 }
 
 // copyFile copies a file from src to dst. If src and dst files exist, and are
 // the same, then return success. Otherwise copy the file contents from src to dst.
-func (fbm *FileBaseManager) copyFile(src, dst string) error {
+func (fbm *fileBaseManager) copyFile(src, dst string) error {
 	sfi, err := os.Stat(src)
 	if err != nil {
 		return err
@@ -83,7 +83,7 @@ func (fbm *FileBaseManager) copyFile(src, dst string) error {
 // by dst. The file will be created if it does not already exist. If the
 // destination file exists, all it's contents will be replaced by the contents
 // of the source file.
-func (fbm *FileBaseManager) copyFileContents(src, dst string) error {
+func (fbm *fileBaseManager) copyFileContents(src, dst string) error {
 	var err error
 	in, err := os.Open(src)
 	if err != nil {

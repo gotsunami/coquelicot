@@ -17,11 +17,11 @@ type dirManager struct {
 }
 
 // Prepare dirManager given root, mime.
-func CreateDir(root, mime string) (*dirManager, error) {
+func createDir(root, mime string) (*dirManager, error) {
 	dm := newDirManager(root)
 
 	dm.CalcPath(mime)
-	if err := dm.Create(); err != nil {
+	if err := dm.create(); err != nil {
 		return nil, err
 	}
 
@@ -29,7 +29,7 @@ func CreateDir(root, mime string) (*dirManager, error) {
 }
 
 // Check path and return dirManager.
-func CheckDir(root, path string) (*dirManager, error) {
+func checkDir(root, path string) (*dirManager, error) {
 	dm := newDirManager(root)
 
 	if m, _ := filepath.Match("/[a-z]*/[0-9]*/[0-9a-z]*/[0-9a-z]*", path); m != true {
@@ -51,7 +51,7 @@ func (dm *dirManager) Abs() string {
 }
 
 // Create directory obtained by concatenating the root and path.
-func (dm *dirManager) Create() error {
+func (dm *dirManager) create() error {
 	return os.MkdirAll(dm.Root+dm.Path, 0755)
 }
 

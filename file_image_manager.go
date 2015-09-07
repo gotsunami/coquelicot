@@ -5,16 +5,16 @@ import (
 	"os/exec"
 )
 
-type FileImageManager struct {
-	*FileDefaultManager
-	Width   int
-	Height  int
-	convert bool // Add resized version with ImageMagick
+type fileImageManager struct {
+	*fileDefaultManager
+	Width     int
+	Height    int
+	thumbnail bool // Add resized version with ImageMagick
 }
 
 // Save version from original with convert command-line tool.
-func (fim *FileImageManager) Convert(src string, convert string) error {
-	if !fim.convert {
+func (fim *fileImageManager) convert(src string, convert string) error {
+	if !fim.thumbnail {
 		// Raw copy
 		return fim.rawCopy(src, convert)
 	}
@@ -31,7 +31,7 @@ func (fim *FileImageManager) Convert(src string, convert string) error {
 	return nil
 }
 
-func (fim *FileImageManager) ToJson() map[string]interface{} {
+func (fim *fileImageManager) ToJson() map[string]interface{} {
 	return map[string]interface{}{
 		"url":      fim.Url(),
 		"filename": fim.Filename,
