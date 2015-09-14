@@ -37,20 +37,20 @@ The `fileupload` object needs the `xhrFields`, `maxChunkSize` and `add` fields t
 
 Download the [latest release](https://github.com/blueimp/jQuery-File-Upload/releases) of jQuery-File-Upload,
 edit the `js/main.js` file in the distribution and make the `fileupload` iniitialization look like
-(replacing the `server:port` part with the name/IP of your server running the `coquelicot` program):
+(replacing the `localhost:9073` part with the name:port of your server running the `coquelicot` program):
 
 ```
 $('#fileupload').fileupload({
     // Send cross-domain cookies
     xhrFields: {withCredentials: true},
-    url: 'http://server:port/upload/files',
+    url: 'http://localhost:9073/upload/files',
     // Chunk size in bytes
     maxChunkSize: 1000000,
     // Enable file resume
     add: function (e, data) {
         var that = this;
         $.ajax({
-            url: 'http://server:port/upload/resume',
+            url: 'http://localhost:9073/upload/resume',
             xhrFields: {withCredentials: true},
             data: {file: data.files[0].name}
         }).done(function(result) {
