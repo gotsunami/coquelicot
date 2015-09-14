@@ -27,7 +27,7 @@ The `fileupload` object needs the `xhrFields`, `maxChunkSize` and `add` fields t
 - `maxChunkSize`: enables uploading chunks of file
 - `add`: overwrites the default `add` handler to support resuming file upload
 
-Download the [latest](https://github.com/blueimp/jQuery-File-Upload/releases) release of jQuery-File-Upload,
+Download the [latest release](https://github.com/blueimp/jQuery-File-Upload/releases) of jQuery-File-Upload,
 edit the `js/main.js` file in the distribution and make the `fileupload` iniitialization look like
 (replacing the `server:port` part with the name/IP of your server running the `coquelicot` program):
 
