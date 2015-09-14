@@ -17,7 +17,15 @@ You can use a binary release or get the project if you have a working Go install
 
 #### Binary Release
 
-Grab the latest [binary release](https://github.com/gotsunami/coquelicot/releases) for you system.
+Grab the latest [binary release](https://github.com/gotsunami/coquelicot/releases) for you system. Unzip it
+and run
+
+```
+$ ./coquelicot -storage /tmp/files -host localhost:9073
+```
+
+to store uploaded files into `/tmp/files` and make the application listen on the loopback interface port 9073
+(run `coquelicot.exe` on Windows).
 
 ### jQuery-File-Upload Setup (Client)
 
