@@ -27,6 +27,16 @@ $ ./coquelicot -storage /tmp/files -host localhost:9073
 to store uploaded files into `/tmp/files` and make the application listen on the loopback interface port 9073
 (run `coquelicot.exe` on Windows).
 
+#### Source Release
+
+Grab the latest stable version with:
+
+```
+$ go get gopkg.in/gotsunami/coquelicot.v1
+```
+
+See the [API documentation](http://gopkg.in/gotsunami/coquelicot.v1).
+
 ### jQuery-File-Upload Setup (Client)
 
 The `fileupload` object needs the `xhrFields`, `maxChunkSize` and `add` fields to be defined.
