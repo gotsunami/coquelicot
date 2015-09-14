@@ -87,20 +87,20 @@ and run</p>
 </ul>
 
 <p>Download the <a href="https://github.com/blueimp/jQuery-File-Upload/releases">latest release</a> of jQuery-File-Upload,
-edit the <code>js/main.js</code> file in the distribution and make the <code>fileupload</code> iniitialization look like
+edit the <code>js/main.js</code> file in the distribution and make the <code>fileupload</code> initialization look like
 (replacing the <code>localhost:9073</code> part with the name:port of your server running the <code>coquelicot</code> program):</p>
 
 <pre><code>$('#fileupload').fileupload({
     // Send cross-domain cookies
     xhrFields: {withCredentials: true},
-    url: 'http://localhost:9073/upload/files',
+    url: 'http://localhost:9073/files',
     // Chunk size in bytes
     maxChunkSize: 1000000,
     // Enable file resume
     add: function (e, data) {
         var that = this;
         $.ajax({
-            url: 'http://localhost:9073/upload/resume',
+            url: 'http://localhost:9073/resume',
             xhrFields: {withCredentials: true},
             data: {file: data.files[0].name}
         }).done(function(result) {
