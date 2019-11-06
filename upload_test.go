@@ -10,7 +10,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"code.google.com/p/go-uuid/uuid"
+	//"code.google.com/p/go-uuid/uuid"
+	"github.com/pborman/uuid"
 
 	"github.com/stretchr/testify/assert"
 )
